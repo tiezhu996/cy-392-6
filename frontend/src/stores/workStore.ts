@@ -3,6 +3,7 @@ import { computed, ref } from "vue";
 import { mockWorks } from "../mock/works";
 import { readWorks, writeWorks } from "../storage/indexedDb";
 import type { Comment, CraftWork } from "../types/work";
+import { migrateWork } from "../types/work";
 import { filterWorks, type WorkFilter } from "../utils/filter";
 
 export const useWorkStore = defineStore("works", () => {
@@ -12,8 +13,18 @@ export const useWorkStore = defineStore("works", () => {
   const displayed = computed(() => filterWorks(works.value, filter.value));
   async function hydrate() {
     const saved = await readWorks();
-    works.value = saved.length ? saved : mockWorks;
-    if (!saved.length) await writeWorks(works.value);
+    if (!saved.length) {
+      works.value = mockWorks;
+      await writeWorks(works.value);
+      return;
+    }
+    const migrated = saved.map((w) => migrateWork(w as unknown as Record<string, unknown>));
+    const needsWrite = migrated.some((w, i) => {
+      const raw = saved[i] as unknown as Record<string, unknown>;
+      return !Array.isArray(raw.comments);
+    });
+    works.value = migrated;
+    if (needsWrite) await writeWorks(migrated);
   }
   function persist() { writeWorks(works.value); }
   function like(id: string) { const item = works.value.find((w) => w.id === id); if (item) item.likes += 1; persist(); }
