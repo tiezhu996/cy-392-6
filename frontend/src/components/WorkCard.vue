@@ -14,6 +14,7 @@ defineEmits<{ select: [CraftWork]; like: [string]; collect: [string] }>();
       <div class="meta"><span>{{ work.difficulty }}</span><span>{{ work.durationHours }} 小时</span></div>
       <div class="actions">
         <button @click="$emit('like', work.id)">赞 {{ work.likes }}</button>
+        <span class="comment-count">💬 {{ work.comments.length }}</span>
         <button @click="$emit('collect', work.id)">{{ work.collected ? "已收藏" : "收藏" }}</button>
       </div>
     </div>

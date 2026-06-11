@@ -8,6 +8,13 @@ export interface Author {
   followed: boolean;
 }
 
+export interface Comment {
+  id: string;
+  author: string;
+  content: string;
+  createdAt: string;
+}
+
 export interface CraftWork {
   id: string;
   title: string;
@@ -22,5 +29,6 @@ export interface CraftWork {
   author: Author;
   likes: number;
   collected: boolean;
+  comments: Comment[];
   createdAt: string;
 }
